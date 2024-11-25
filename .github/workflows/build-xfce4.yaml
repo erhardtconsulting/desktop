@@ -8,6 +8,10 @@ on:
       - 'xfce4/**'
       - '.github/workflows/build-xfce4.yaml'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
