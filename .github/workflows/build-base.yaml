@@ -13,7 +13,8 @@ jobs:
       # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
-        token: '${{ secrets.GH_BOT_TOKEN }}'
+        with:
+          token: '${{ secrets.GH_BOT_TOKEN }}'
     
       # Run the build script
       - name: Build container
