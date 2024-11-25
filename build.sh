@@ -5,6 +5,7 @@ BUILDER="docker"
 CONTAINER="base"
 BUILD_CHILDS="false"
 VERBOSE="false"
+PUSH="false"
 
 # set base variables
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
@@ -19,10 +20,11 @@ debug_msg() {
 show_help() {
   cat << EOF
 🔥 Container build tool 🔥
-usage: ./build.sh [-c|--build-childs] [-p|--podman] [--platform PLATFORM] [-v|--verbose] CONTAINER
+usage: ./build.sh [-c|--build-childs] [--push] [-p|--podman] [--platform PLATFORM] [-v|--verbose] CONTAINER
 options:
   -c|--build-childs: rebuilds childs, when base image was updated
   -p|--podman:       enabled podman builds (default docker builds)
+  --push:            push image after build
   --platform:        specify build platform (e.g., linux/amd64, linux/arm64)
   -v|--verbose:      enable verbose mode
 
@@ -126,21 +128,27 @@ build_container() {
   fi
 
   if [ "$BUILDER" = "podman" ]; then
-    (set -ex; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context")
-    if [ $? -ne 0 ]; then
+    if ! (set -ex; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
       echo "⛔ Error: Podman build failed." >&2
       exit 1
     fi
     
-    digest=$(podman inspect "$tag" --format '{{.Digest}}' || true)
+    digest=$(podman inspect "$tag" --format '{{.Digest}}')
+    if [ "$PUSH" = "true" ]; then
+      echo "⏫ Pushing image..."
+      (set -ex; podman push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
+    fi
   elif [ "$BUILDER" = "docker" ]; then
-    (set -ex; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load)
-    if [ $? -ne 0 ]; then
+    if ! (set -ex; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load); then
       echo "⛔ Error: Docker build failed." >&2
       exit 1
     fi
 
-    digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//' || true)
+    digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//')
+    if [ "$PUSH" = "true" ]; then
+      echo "⏫ Pushing image..."
+      (set -ex; docker push "$tag") || { echo "⛔ Error: docker push failed." >&2; exit 1; }
+    fi
   fi
 }
 
@@ -153,6 +161,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     -p|--podman)
       BUILDER="podman"
+      shift 1
+      ;;
+    --push)
+      PUSH="true"
       shift 1
       ;;
     -h|--help)

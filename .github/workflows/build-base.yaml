@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'base/**'
+      - '.github/workflows/build-base.yaml'
 
 jobs:
   build-and-push:
@@ -16,6 +19,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
 
+      # Login into ghcr.io
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: '${{ github.actor }}'
+          password: '${{ github.token }}'
+          registry: 'ghcr.io/${{ github.repository_owner }}'
+
       # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,5 +34,28 @@ jobs:
           token: '${{ secrets.GH_BOT_TOKEN }}'
     
       # Run the build script
-      - name: Build container
-        run: ./build.sh -p --platform linux/amd64,linux/arm64/v8 base
+      - name: Build and push container
+        run: |
+          ./build.sh -p --push --platform linux/amd64,linux/arm64/v8 base
+
+      # Check for changes in the repository
+      - name: Check for file changes
+        id: git_status
+        run: |
+          git config user.name "erhardt-consulting-bot"
+          git config user.email "183287306+erhardt-consulting-bot@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit." >> $GITHUB_ENV
+            echo "changes=false" >> $GITHUB_ENV
+          else
+            echo "Changes detected." >> $GITHUB_ENV
+            echo "changes=true" >> $GITHUB_ENV
+          fi
+
+      # Commit and push changes if any
+      - name: Commit and push changes
+        if: env.changes == 'true'
+        run: |
+          git commit -m "chore(container): update image digests"
+          git push origin main
