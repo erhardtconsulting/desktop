@@ -34,6 +34,7 @@ EOF
 
 check_system() {
   debug_msg "Checking build system..."
+  command -v jq >/dev/null 2>&1 || { echo "⛔ Error: jq is not installed." >&2; exit 255; }
   command -v yq >/dev/null 2>&1 || { echo "⛔ Error: yq is not installed." >&2; exit 255; }
   if [ "$BUILDER" = "podman" ]; then
     echo "Using builder: podman 🛸"
@@ -82,6 +83,13 @@ run_build() {
     exit 1
   fi
 
+  # push must be enabled when doing multi-platform builds.
+  if [ "$PUSH" = "false" ] && [ -n "$PLATFORM" ]; then
+    echo "⚠️ Child containers won't be updated without push on multi-platform builds."
+    echo "Either enable push or disable multi-platform builds."
+    exit 0;
+  fi
+
   # update child containers
   echo "🔄 Updating child containers..."
   for dir in "${VALID_CONTAINERS[@]}"; do
@@ -122,32 +130,41 @@ build_container() {
 
   if [ -n "$PLATFORM" ]; then
     PLATFORM_CMD="--platform $PLATFORM"
+    IFS=',' read -r -a platforms <<< "$PLATFORM"
+    NUM_PLATFORMS=${#platforms[@]}
     echo "Using platform: $PLATFORM"
   else
     PLATFORM_CMD=""
+    NUM_PLATFORMS=1
+  fi
+
+  if [ "$PUSH" == "true" ]; then
+    PUSH_CMD="--push"
+  else
+    PUSH_CMD=""
   fi
 
   if [ "$BUILDER" = "podman" ]; then
-    if ! (set -ex; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
+    if ! (set -ex; podman build $PUSH_CMD $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
       echo "⛔ Error: Podman build failed." >&2
       exit 1
     fi
-    
-    digest=$(podman inspect "$tag" --format '{{.Digest}}')
-    if [ "$PUSH" = "true" ]; then
-      echo "⏫ Pushing image..."
-      (set -ex; podman push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
+
+    if [ "$NUM_PLATFORMS" -ge 2 ]; then
+      digest=$(podman manifest inspect "$tag" | jq -r '.digest')
+    else
+      digest=$(podman inspect "$tag" --format '{{.Digest}}')
     fi
   elif [ "$BUILDER" = "docker" ]; then
-    if ! (set -ex; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load); then
+    if ! (set -ex; docker buildx build $PUSH_CMD $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load); then
       echo "⛔ Error: Docker build failed." >&2
       exit 1
     fi
 
-    digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//')
-    if [ "$PUSH" = "true" ]; then
-      echo "⏫ Pushing image..."
-      (set -ex; docker push "$tag") || { echo "⛔ Error: docker push failed." >&2; exit 1; }
+    if [ "$NUM_PLATFORMS" -ge 2 ]; then
+      digest=$(docker buildx imagetools inspect "$tag" | grep Digest | awk '{print $2}')
+    else
+      digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//')
     fi
   fi
 }
