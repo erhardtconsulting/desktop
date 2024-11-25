@@ -126,10 +126,10 @@ build_container() {
   fi
 
   if [ "$BUILDER" = "podman" ]; then
-    (set -x; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context")
+    (set -ex; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context")
     digest=$(podman inspect "$tag" --format '{{.Digest}}' || true)
   elif [ "$BUILDER" = "docker" ]; then
-    (set -x; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load)
+    (set -ex; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load)
     digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//' || true)
   fi
 }
