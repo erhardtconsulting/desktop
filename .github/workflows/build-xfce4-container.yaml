@@ -1,12 +1,12 @@
-name: Build and Push Base Container
+name: Build and Push xfce4 Container
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'base/**'
-      - '.github/workflows/build-base-container.yaml'
+      - 'xfce4/**'
+      - '.github/workflows/build-xfce4-container.yaml'
 
 permissions:
   contents: read
@@ -46,16 +46,16 @@ jobs:
 
       - name: Build image with podman
         run: |
-          podman build -f "base/Dockerfile" -t "ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }}" "base/"
+          podman build -f "xfce4/Dockerfile" -t "ghcr.io/erhardtconsulting/desktop-xfce4:build-${{ env.PODMAN_ARCH }}" "xfce4/"
 
       - name: Put container to oci
         run: |
-          skopeo copy containers-storage:ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }} oci-archive:/tmp/${{ env.PODMAN_ARCH }}-oci.tar
+          skopeo copy containers-storage:ghcr.io/erhardtconsulting/desktop-xfce4:build-${{ env.PODMAN_ARCH }} oci-archive:/tmp/${{ env.PODMAN_ARCH }}-oci.tar
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: base-build-${{ env.PODMAN_ARCH }}
+          name: xfce4-build-${{ env.PODMAN_ARCH }}
           path: /tmp/${{ env.PODMAN_ARCH }}-oci.tar
           if-no-files-found: error
           retention-days: 7
@@ -68,26 +68,26 @@ jobs:
       - name: Download amd64
         uses: actions/download-artifact@v4
         with:
-          name: base-build-amd64
+          name: xfce4-build-amd64
           path: /tmp
 
       - name: Download arm64
         uses: actions/download-artifact@v4
         with:
-          name: base-build-arm64
+          name: xfce4-build-arm64
           path: /tmp
 
       - name: Create multi-arch image
         run: |
-          podman manifest create ghcr.io/erhardtconsulting/desktop-base:manifest
-          podman manifest add ghcr.io/erhardtconsulting/desktop-base:manifest oci-archive:/tmp/arm64-oci.tar
-          podman manifest add ghcr.io/erhardtconsulting/desktop-base:manifest oci-archive:/tmp/amd64-oci.tar
-          podman tag ghcr.io/erhardtconsulting/desktop-base:manifest ghcr.io/erhardtconsulting/desktop-base:latest
+          podman manifest create ghcr.io/erhardtconsulting/desktop-xfce4:manifest
+          podman manifest add ghcr.io/erhardtconsulting/desktop-xfce4:manifest oci-archive:/tmp/arm64-oci.tar
+          podman manifest add ghcr.io/erhardtconsulting/desktop-xfce4:manifest oci-archive:/tmp/amd64-oci.tar
+          podman tag ghcr.io/erhardtconsulting/desktop-xfce4:manifest ghcr.io/erhardtconsulting/desktop-xfce4:latest
 
       - name: Push image to ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: desktop-base
+          image: desktop-xfce4
           tags: latest
           username: ${{ github.actor }}
           password: ${{ github.token }}
