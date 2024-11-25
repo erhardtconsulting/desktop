@@ -92,4 +92,4 @@ jobs:
           tags: latest
           username: ${{ github.actor }}
           password: ${{ github.token }}
-          registry: ghcr.io/${{ env.OWNER_LC }}
+          registry: ghcr.io/erhardtconsulting
