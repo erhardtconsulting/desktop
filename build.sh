@@ -150,7 +150,7 @@ build_container() {
 
       if [ "$PUSH" = "true" ]; then
         echo "⏫ Pushing image..."
-        (set -ex; podman manifest push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
+        (set -ex; podman manifest push "$tag" "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
       fi
 
       digest=$(podman manifest inspect "$tag" | jq -r '.digest')
