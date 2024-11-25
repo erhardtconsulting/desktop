@@ -1,0 +1,93 @@
+name: Build and Push Base Container
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'base/**'
+      - '.github/workflows/build-base-container.yaml'
+      - 'build.sh'
+
+permissions:
+  contents: read
+  packages: write
+
+build:
+  name: Build image
+  runs-on: ubuntu-latest
+  strategy:
+    matrix:
+      platform: ["linux/amd64", "linux/arm64"]
+  steps:
+    # Install qemu
+    - name: Install qemu dependency
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user-static
+
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Enable podman cache
+    - name: Cache podman storage
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/share/containers/storage
+        key: podman-storage-${{ matrix.platform }}
+
+    # Export arch
+    - name: export architecture name (removing os prefix)
+      run: |
+        echo "PODMAN_ARCH=${PLATFORM#*/}" >> ${GITHUB_ENV}
+      env:
+        PLATFORM: ${{ matrix.platform }}
+
+    - name: Build image with podman
+      run: |
+        podman build -f "base/Dockerfile" -t "ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }}" "base/"
+
+    - name: Put container to oci
+      run: |
+        skopeo copy containers-storage:ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }} oci-archive:/tmp/${{ env.PODMAN_ARCH }}-oci.tar
+
+    - name: Upload digest
+      uses: actions/upload-artifact@v3
+      with:
+        name: base-build-${{ env.PODMAN_ARCH }}
+        path: /tmp/${{ env.PODMAN_ARCH }}-oci.tar
+        if-no-files-found: error
+        retention-days: 7
+
+push:
+  name: Push image
+  runs-on: ubuntu-latest
+  steps:
+    - name: Download amd64
+      uses: actions/download-artifact@v3
+      with:
+        name: base-build-amd64
+        path: /tmp
+
+    - name: Download arm64
+      uses: actions/download-artifact@v3
+      with:
+        name: base-build-arm64
+        path: /tmp
+
+    - name: Create multi-arch image
+      run: |
+        podman manifest create ghcr.io/erhardtconsulting/desktop-base:manifest
+        podman manifest add ghcr.io/erhardtconsulting/desktop-base:manifest oci-archive:/tmp/arm64-oci.tar
+        podman manifest add ghcr.io/erhardtconsulting/desktop-base:manifest oci-archive:/tmp/amd64-oci.tar
+        podman tag ghcr.io/erhardtconsulting/desktop-base:manifest ghcr.io/erhardtconsulting/desktop-base:latest
+
+    - name: Push image to ghcr
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: desktop-base
+        tags: latest
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+        registry: ghcr.io/${{ env.OWNER_LC }}
