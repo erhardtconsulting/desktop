@@ -139,23 +139,35 @@ build_container() {
   fi
 
   if [ "$BUILDER" = "podman" ]; then
-    if ! (set -ex; podman buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
-      echo "⛔ Error: Podman build failed." >&2
-      exit 1
-    fi
 
-    if [ "$PUSH" = "true" ]; then
-      echo "⏫ Pushing image..."
-      (set -ex; podman push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
-    fi
 
     if [ "$NUM_PLATFORMS" -ge 2 ]; then
+      (set -ex; podman manifest create "$tag") || { echo "⛔ Error: podman create manifest failed." >&2; exit 1; }
+      if ! (set -ex; podman build --platform "$PLATFORM" --manifest "$tag" -f "$context/Dockerfile" "$context"); then
+        echo "⛔ Error: Podman build failed." >&2
+        exit 1
+      fi
+
+      if [ "$PUSH" = "true" ]; then
+        echo "⏫ Pushing image..."
+        (set -ex; podman manifest push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
+      fi
+
       digest=$(podman manifest inspect "$tag" | jq -r '.digest')
     else
+      if ! (set -ex; podman build -f "$context/Dockerfile" -t "$tag" "$context"); then
+        echo "⛔ Error: Podman build failed." >&2
+        exit 1
+      fi
+
+      if [ "$PUSH" = "true" ]; then
+        echo "⏫ Pushing image..."
+        (set -ex; podman push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
+      fi
       digest=$(podman inspect "$tag" --format '{{.Digest}}')
     fi
   elif [ "$BUILDER" = "docker" ]; then
-    if [ "$PUSH" == "true" ]; then
+    if [ "$PUSH" = "true" ]; then
       PUSH_CMD="--push"
     else
       PUSH_CMD=""
