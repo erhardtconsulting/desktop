@@ -138,16 +138,15 @@ build_container() {
     NUM_PLATFORMS=1
   fi
 
-  if [ "$PUSH" == "true" ]; then
-    PUSH_CMD="--push"
-  else
-    PUSH_CMD=""
-  fi
-
   if [ "$BUILDER" = "podman" ]; then
-    if ! (set -ex; podman build $PUSH_CMD $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
+    if ! (set -ex; podman buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context"); then
       echo "⛔ Error: Podman build failed." >&2
       exit 1
+    fi
+
+    if [ "$PUSH" = "true" ]; then
+      echo "⏫ Pushing image..."
+      (set -ex; podman push "$tag") || { echo "⛔ Error: podman push failed." >&2; exit 1; }
     fi
 
     if [ "$NUM_PLATFORMS" -ge 2 ]; then
@@ -156,6 +155,12 @@ build_container() {
       digest=$(podman inspect "$tag" --format '{{.Digest}}')
     fi
   elif [ "$BUILDER" = "docker" ]; then
+    if [ "$PUSH" == "true" ]; then
+      PUSH_CMD="--push"
+    else
+      PUSH_CMD=""
+    fi
+
     if ! (set -ex; docker buildx build $PUSH_CMD $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load); then
       echo "⛔ Error: Docker build failed." >&2
       exit 1
