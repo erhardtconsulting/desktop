@@ -127,9 +127,19 @@ build_container() {
 
   if [ "$BUILDER" = "podman" ]; then
     (set -ex; podman build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context")
+    if [ $? -ne 0 ]; then
+      echo "⛔ Error: Podman build failed." >&2
+      exit 1
+    fi
+    
     digest=$(podman inspect "$tag" --format '{{.Digest}}' || true)
   elif [ "$BUILDER" = "docker" ]; then
     (set -ex; docker buildx build $PLATFORM_CMD -f "$context/Dockerfile" -t "$tag" "$context" --progress=plain --load)
+    if [ $? -ne 0 ]; then
+      echo "⛔ Error: Docker build failed." >&2
+      exit 1
+    fi
+
     digest=$(docker inspect "$tag" --format '{{index .RepoDigests 0}}' | sed 's/^.*@//' || true)
   fi
 }
