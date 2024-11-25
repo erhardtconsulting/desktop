@@ -49,10 +49,10 @@ jobs:
           git config user.email "183287306+erhardt-consulting-bot@users.noreply.github.com"
           git add .
           if git diff --cached --quiet; then
-            echo "No changes to commit." >> $GITHUB_ENV
+            echo "No changes to commit."
             echo "changes=false" >> $GITHUB_ENV
           else
-            echo "Changes detected." >> $GITHUB_ENV
+            echo "Changes detected."
             echo "changes=true" >> $GITHUB_ENV
           fi
 
