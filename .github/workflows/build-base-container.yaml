@@ -7,12 +7,14 @@ on:
     paths:
       - 'base/**'
       - '.github/workflows/build-base-container.yaml'
+
 permissions:
   contents: read
   packages: write
 
 jobs:
   call-build-workflow:
+    name: Build Base
     uses: erhardtconsulting/desktop/.github/workflows/build-container.yaml@main
     with:
       image: base
