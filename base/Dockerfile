@@ -35,6 +35,8 @@ RUN set -eux; \
       wget; \
     apt-get clean
 
+ENV DISPLAY=:0
+
 LABEL org.opencontainers.image.authors="erhardt consulting GmbH"
 LABEL org.opencontainers.image.url="https://github.com/erhardtconsulting/desktop"
 LABEL org.opencontainers.image.source="https://github.com/erhardtconsulting/desktop"
