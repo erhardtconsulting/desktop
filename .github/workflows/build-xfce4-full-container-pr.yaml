@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'xfce4/**'
+      - 'xfce4-full/**'
       - '.github/workflows/build-xfce4-full-container.yaml'
 
 permissions:
