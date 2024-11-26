@@ -41,8 +41,8 @@ jobs:
       - name: export architecture name (removing os prefix)
         run: |
           echo "PLATFORM=${PLATFORM}" >> ${GITHUB_ENV}
-          [ "${PLATFORM}" = "amd64" ] && echo "PODMAN_ARCH=linux/amd64" >> ${GITHUB_ENV}
-          [ "${PLATFORM}" = "arm64" ] && echo "PODMAN_ARCH=linux/arm64/v8" >> ${GITHUB_ENV}
+          [ "${PLATFORM}" = "amd64" ] && echo "PODMAN_ARCH=linux/amd64" >> ${GITHUB_ENV} || true
+          [ "${PLATFORM}" = "arm64" ] && echo "PODMAN_ARCH=linux/arm64/v8" >> ${GITHUB_ENV} || true
         env:
           PLATFORM: ${{ matrix.platform }}
 
