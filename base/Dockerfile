@@ -15,4 +15,8 @@ RUN set -eux; \
       wget; \
     apt-get clean
 
+LABEL org.opencontainers.image.source="https://github.com/erhardtconsulting/desktop"
+LABEL org.opencontainers.image.description="Base desktop with TigerVNC"
+LABEL org.opencontainers.image.licenses="MIT"
+
 ENTRYPOINT ["/usr/bin/tini", "--"]

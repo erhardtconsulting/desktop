@@ -15,4 +15,8 @@ USER 1000
 
 EXPOSE 5900
 
+LABEL org.opencontainers.image.source="https://github.com/erhardtconsulting/desktop"
+LABEL org.opencontainers.image.description="Base Xfce4 image"
+LABEL org.opencontainers.image.licenses="MIT"
+
 CMD ["/docker-run.sh"]
