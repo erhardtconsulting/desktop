@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM docker.io/library/ubuntu:24.04@sha256:278628f08d4979fb9af9ead44277dbc9c92c2465922310916ad0c46ec9999295
 
 # Update apt get
