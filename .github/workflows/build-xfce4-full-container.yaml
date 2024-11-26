@@ -1,4 +1,4 @@
-name: Build and Push xfce4 Container
+name: Build and Push Xfce4-Full Container
 
 on:
   push:
