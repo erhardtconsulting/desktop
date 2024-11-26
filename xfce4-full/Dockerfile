@@ -8,7 +8,7 @@ RUN set -eux; \
     extrepo enable vscodium; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      build-essentials \
+      build-essential \
       codium \
       cups \
       gimp \
