@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ["linux/amd64", "linux/arm64"]
+        platform: ["amd64", "arm64"]
     steps:
       # Install qemu
       - name: Install qemu dependency
@@ -40,23 +40,25 @@ jobs:
       # Export arch
       - name: export architecture name (removing os prefix)
         run: |
-          echo "PODMAN_ARCH=${PLATFORM#*/}" >> ${GITHUB_ENV}
+          echo "PLATFORM=${PLATFORM}" >> ${GITHUB_ENV}
+          [ "${PLATFORM}" = "amd64" ] && echo "PODMAN_ARCH=linux/amd64" >> ${GITHUB_ENV}
+          [ "${PLATFORM}" = "arm64" ] && echo "PODMAN_ARCH=linux/arm64/v8" >> ${GITHUB_ENV}
         env:
           PLATFORM: ${{ matrix.platform }}
 
       - name: Build image with podman
         run: |
-          podman build -f "base/Dockerfile" -t "ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }}" "base/"
+          podman build --platform ${{ env.PODMAN_ARCH }} -f "base/Dockerfile" -t "ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PLATFORM }}" "base/"
 
       - name: Put container to oci
         run: |
-          skopeo copy containers-storage:ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PODMAN_ARCH }} oci-archive:/tmp/${{ env.PODMAN_ARCH }}-oci.tar
+          skopeo copy containers-storage:ghcr.io/erhardtconsulting/desktop-base:build-${{ env.PLATFORM }} oci-archive:/tmp/${{ env.PLATFORM }}-oci.tar
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: base-build-${{ env.PODMAN_ARCH }}
-          path: /tmp/${{ env.PODMAN_ARCH }}-oci.tar
+          name: base-build-${{ env.PLATFORM }}
+          path: /tmp/${{ env.PLATFORM }}-oci.tar
           if-no-files-found: error
           retention-days: 7
 
