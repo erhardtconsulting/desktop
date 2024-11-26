@@ -1,18 +1,20 @@
-FROM docker.io/library/ubuntu:24.04@sha256:278628f08d4979fb9af9ead44277dbc9c92c2465922310916ad0c46ec9999295
+FROM docker.io/library/debian:bookworm@sha256:10901ccd8d249047f9761845b4594f121edef079cfd8224edebd9ea726f0a7f6
 
 # Update apt get
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
+      apt-transport-https \
+      ca-certificates \
       curl \
       dbus \
       dbus-user-session \
       dbus-x11 \
+      extrepo \
       fonts-dejavu-core \
       fonts-freefont-ttf \
       fonts-indic \
       fonts-kacst-one \
-      fonts-khmeros-core \
       fonts-lao \
       fonts-liberation \
       fonts-lklug-sinhala \
@@ -21,16 +23,17 @@ RUN set -eux; \
       fonts-noto-extra \
       fonts-noto-hinted \
       fonts-opensymbol \
+      fonts-quicksand \
       fonts-sil-abyssinica \
       fonts-sil-padauk \
       fonts-symbola \
       fonts-thai-tlwg \
       fonts-tibetan-machine \
-      fonts-ubuntu \
       nano \
       pulseaudio \
       supervisor \
       tigervnc-standalone-server \
+      tigervnc-tools \
       tini \
       vim \
       wget; \

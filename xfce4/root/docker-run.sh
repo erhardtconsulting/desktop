@@ -9,10 +9,10 @@ if [ ! -w "/tmp" ]; then
 fi
 
 # Check if /home/ubuntu is writeable
-if [ ! -w "/home/ubuntu" ]; then
-  echo "⛔ Directory '/home/ubuntu' is not writeable by the user. Aborting!"
+if [ ! -w "/home/user" ]; then
+  echo "⛔ Directory '/home/user' is not writeable by the user. Aborting!"
   echo "UID: $(id)"
-  echo "Directory Info: $(ls -lhd /home/ubuntu)"
+  echo "Directory Info: $(ls -lhd /home/user)"
   exit 255
 fi
 
@@ -23,8 +23,8 @@ if [ -z "$VNC_PASSWORD" ]; then
 fi
 
 # Set the VNC password for the user 'ubuntu'
-mkdir -p /home/ubuntu/.vnc
-echo "$VNC_PASSWORD" | vncpasswd -f > /home/ubuntu/.vnc/passwd
-chmod 600 /home/ubuntu/.vnc/passwd
+mkdir -p /home/user/.vnc
+echo "$VNC_PASSWORD" | /usr/bin/vncpasswd -f > /home/user/.vnc/passwd
+chmod 600 /home/user/.vnc/passwd
 
-exec /usr/bin/tigervncserver -fg -localhost no :0 -xstartup /usr/bin/xfce4-session
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

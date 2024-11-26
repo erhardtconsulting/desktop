@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'xfce4/**'
-      - '.github/workflows/build-xfce4-container.yaml'
+      - '.github/workflows/build-xfce4-full-container.yaml'
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   call-build-workflow:
-    name: Build Xfce4
+    name: Build Xfce4-Full
     uses: erhardtconsulting/desktop/.github/workflows/build-container.yaml@main
     with:
-      image: xfce4
+      image: xfce4-full
