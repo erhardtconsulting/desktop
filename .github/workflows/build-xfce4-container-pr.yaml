@@ -1,12 +1,12 @@
-name: Build and Push xfce4 Container
+name: Build Xfce4 Container
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
       - 'xfce4/**'
-      - '.github/workflows/build-xfce4-full-container.yaml'
+      - '.github/workflows/build-xfce4-container.yaml'
 
 permissions:
   contents: read
@@ -14,8 +14,8 @@ permissions:
 
 jobs:
   call-build-workflow:
-    name: Build & Push Xfce4-Full
+    name: Build Xfce4
     uses: erhardtconsulting/desktop/.github/workflows/build-container.yaml@main
     with:
-      image: xfce4-full
-      push: true
+      image: xfce4
+      push: false

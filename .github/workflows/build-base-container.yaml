@@ -14,7 +14,8 @@ permissions:
 
 jobs:
   call-build-workflow:
-    name: Build Base
+    name: Build & Push Base
     uses: erhardtconsulting/desktop/.github/workflows/build-container.yaml@main
     with:
       image: base
+      push: true

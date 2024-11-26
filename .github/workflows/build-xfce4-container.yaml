@@ -1,4 +1,4 @@
-name: Build and Push xfce4 Container
+name: Build and Push Xfce4 Container
 
 on:
   push:
@@ -14,7 +14,8 @@ permissions:
 
 jobs:
   call-build-workflow:
-    name: Build Xfce4
+    name: Build & Push Xfce4
     uses: erhardtconsulting/desktop/.github/workflows/build-container.yaml@main
     with:
       image: xfce4
+      push: true
