@@ -9,6 +9,7 @@ RUN set -eux; \
       dbus-user-session \
       dbus-x11 \
       nano \
+      supervisor \
       tigervnc-standalone-server \
       tini \
       vim \
