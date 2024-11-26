@@ -5,10 +5,23 @@ USER 0
 
 # Install dependencies
 RUN set -eux; \
+    extrepo enable vscodium; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      build-essentials \
+      codium \
+      cups \
+      gimp \
       git \
-      libreoffice; \
+      hplip \
+      hplip-gui \
+      libreoffice \
+      libreoffice-style-elementary \
+      openprinting-ppds \
+      orage \
+      simple-scan \
+      vlc \
+      xfce4-screenshooter; \
     apt-get clean
 
 # Switch back to user

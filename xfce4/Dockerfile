@@ -2,15 +2,19 @@ FROM ghcr.io/erhardtconsulting/desktop-base:latest@sha256:d3e727d3bff698b19c2a2d
 
 # Install xfce4
 RUN set -eux; \
-    extrepo enable vscodium; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-      codium \
       elementary-xfce-icon-theme \
       firefox-esr \
       mousepad \
+      ristretto \
+      thunar \
+      thunar-archive-plugin \
+      thunar-media-tags-plugin \
       thunderbird \
       xfce4 \
+      xfce4-notifyd \
+      xfce4-taskmanager \
       xfce4-terminal; \
     apt-get clean
 

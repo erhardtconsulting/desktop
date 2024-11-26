@@ -30,13 +30,19 @@ RUN set -eux; \
       fonts-thai-tlwg \
       fonts-tibetan-machine \
       nano \
+      net-tools \
+      openssh-client \
+      pavucontrol \
+      pavumeter \
       pulseaudio \
       supervisor \
       tigervnc-standalone-server \
       tigervnc-tools \
       tini \
+      unzip \
       vim \
-      wget; \
+      wget \
+      zip; \
     apt-get clean
 
 ENV DISPLAY=:0
