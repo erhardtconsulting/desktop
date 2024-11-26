@@ -28,6 +28,7 @@ RUN set -eux; \
       fonts-tibetan-machine \
       fonts-ubuntu \
       nano \
+      pulseaudio \
       supervisor \
       tigervnc-standalone-server \
       tini \
