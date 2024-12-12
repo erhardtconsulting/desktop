@@ -1,4 +1,4 @@
-FROM ghcr.io/erhardtconsulting/desktop-xfce4:latest@sha256:b527400471e7a677e18037ce24744b09f7fb8a678f6b39119159dc898b37504f
+FROM ghcr.io/erhardtconsulting/desktop-xfce4:latest@sha256:680291796238a9fa6e0dfcffbb1c2c729a20e63e059356d6ba5d1d476c8c80d3
 
 # User root user
 USER 0
