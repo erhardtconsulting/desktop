@@ -1,4 +1,4 @@
-FROM ghcr.io/erhardtconsulting/desktop-base:latest@sha256:b13936fc2882ac116c65e9f9bda3a9cfdf46140ce49bd19e1d3927db168f148e
+FROM ghcr.io/erhardtconsulting/desktop-base:latest@sha256:b46530bc3f05cd721c875de5779deb4e988649ae97b324d9c5ba605747f8078a
 
 # Install xfce4
 RUN set -eux; \
