@@ -79,13 +79,13 @@ jobs:
           IMAGE: ${{ inputs.image }}
 
       - name: Download amd64
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: ${{ env.IMAGE }}-build-amd64
           path: /tmp
 
       - name: Download arm64
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: ${{ env.IMAGE }}-build-arm64
           path: /tmp
