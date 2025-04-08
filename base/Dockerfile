@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:bookworm@sha256:17122fe3d66916e55c0cbd5bbf54bb3f87b3582f4d86a755a0fd3498d360f91b
+FROM docker.io/library/debian:bookworm@sha256:00cd074b40c4d99ff0c24540bdde0533ca3791edcdac0de36d6b9fb3260d89e2
 
 # Update apt get
 RUN set -eux; \
